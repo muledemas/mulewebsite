@@ -8,6 +8,8 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { useNavigate } from "react-router-dom";
 
+import { getUsers } from "../components/services/User";
+
 export default function SignIn() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [users, setUsers] = useState([]);
@@ -17,10 +19,13 @@ export default function SignIn() {
   const { email, password } = formData;
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/users")
-      .then((response) => setUsers(response.data));
+    getAllUsers()
   }, []);
+
+  const getAllUsers=async ()=>{
+    const res = await getUsers();
+    setUsers(res.data);
+  }
   function onChange(e) {
     //console.log(e.target.value);
     setFormData((prevState) => ({
@@ -34,6 +39,7 @@ export default function SignIn() {
       users !== null &&
       users.find((user) => user.email === email && user.password === password)
     ) {
+      localStorage.setItem('id',)
       toast("login success", { type: "success" });
       navigate("/");
     } else {

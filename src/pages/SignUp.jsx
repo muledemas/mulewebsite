@@ -9,6 +9,8 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL, ACCESS_TOKEN_NAME } from "../constants/ApiConstants";
 
+import { addUser } from "../components/services/User";
+
 export default function SignUp() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -30,42 +32,19 @@ export default function SignUp() {
       [e.target.id]: e.target.value,
     }));
   }
-  const sendDetailsToServer = () => {
-   
+  const sendDetailsToServer = async () => {
     if (name.length && email.length && password.length) {
-       const payload = {
-         'name': formData.name,
-         'email': formData.email,
-         'password': formData.password,
-       };
-      axios.post(BASE_URL, payload).then((response) => {
-        if (response.status === 200) {
-          setFormData((prevState) => ({
-            ...prevState,
-          }));
-            localStorage.setItem("user", JSON.stringify(response.data));
-            localStorage.setItem(ACCESS_TOKEN_NAME,response.data.token);
-            setFormData(null);
-          redirectToHome();
-        }
-        else{
-          toast("Register failed", { type: "error" });
-        }
-      }).catch(error=>console.log(error));
-    } //end if
-    else {
+      await addUser(formData);
+      redirectToHome();
+    } else {
       toast("please fill the form", { type: "warning" });
     }
-  }
+  };
   function redirectToHome() {
     // props.history.push('/');
     navigate("/");
   }
-  function handleRegister(e) 
-  {
-    e.preventDefault();
-    sendDetailsToServer();
-  }
+
   return (
     <section>
       <h1 className="text-3xl text-center mt-6 font-bold">Sign Up</h1>
@@ -74,7 +53,7 @@ export default function SignUp() {
           <img src={login} alt="sign in" className="w-full rounded-2xl" />
         </div>
         <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20 relative">
-          <form onSubmit={handleRegister}>
+          <form>
             <input
               type="text"
               id="name"
@@ -133,8 +112,9 @@ export default function SignUp() {
               </p>
             </div>
             <button
-              type="submit"
+              type="button"
               className="w-full bg-blue-600 py-3 px-7 mt-3 text-white uppercase rounded text-sm font-medium shadow-md hover:bg-blue-700 transition duration-150 ease-in-out hover:shadow-lg active:bg-blue-800"
+              onClick={() => sendDetailsToServer()}
             >
               Sign up
             </button>
