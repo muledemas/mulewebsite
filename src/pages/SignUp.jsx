@@ -1,45 +1,57 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import login from "../images/login.jpg";
 import { Link } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
+//import axios from "axios";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { useNavigate } from "react-router-dom";
-import { BASE_URL, ACCESS_TOKEN_NAME } from "../constants/ApiConstants";
+//import { BASE_URL, ACCESS_TOKEN_NAME } from "../constants/ApiConstants";
 
 import { addUser } from "../components/services/User";
 
-export default function SignUp() {
+export default function SignUp({ onRegister }) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
   });
-  const [users, setUsers] = useState([]);
+  //const [users, setUsers] = useState([]);
   const [showpassword, setShowPassword] = useState(false);
 
   const { name, email, password } = formData;
 
-  // useEffect(() => {
-
-  // }, []);
   function onChange(e) {
     setFormData((prevState) => ({
       ...prevState,
       [e.target.id]: e.target.value,
     }));
   }
-  const sendDetailsToServer = async () => {
-    if (name.length && email.length && password.length) {
-      await addUser(formData);
-      redirectToHome();
-    } else {
-      toast("please fill the form", { type: "warning" });
+  // const sendDetailsToServer = async () => {
+  //   if (name.length && email.length && password.length) {
+  //     await addUser(formData);
+  //     redirectToHome();
+  //   } else {
+  //     toast("please fill the form", { type: "warning" });
+  //   }
+  // };
+
+  const handleRegister = async () => {
+    try {
+      const response = await axios.post("http://localhost:5000/register", {
+        name,
+        email,
+        password,
+      });
+      onRegister(); // Notify parent component that registration was successful
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast("Registration failed. Please try again.");
     }
   };
+
   function redirectToHome() {
     // props.history.push('/');
     navigate("/");
@@ -114,7 +126,7 @@ export default function SignUp() {
             <button
               type="button"
               className="w-full bg-blue-600 py-3 px-7 mt-3 text-white uppercase rounded text-sm font-medium shadow-md hover:bg-blue-700 transition duration-150 ease-in-out hover:shadow-lg active:bg-blue-800"
-              onClick={() => sendDetailsToServer()}
+              onClick={handleRegister}
             >
               Sign up
             </button>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 export default function Profile() {
-  const [formData, setFormData] = useState({ name: "hjhjhj", email: "" });
+  const [formData, setFormData] = useState({ name: "", email: "" });
 
   const { name, email } = formData;
 

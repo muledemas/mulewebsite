@@ -2,13 +2,15 @@ import React, { useEffect, useState } from "react";
 import login from "../images/login.jpg";
 import { Link } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import axios from "axios";
+//import axios from "axios";
 import {toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { useNavigate } from "react-router-dom";
 
 import { getUsers } from "../components/services/User";
+import axios from "axios";
+import { BASE_URL } from "../constants/ApiConstants";
 
 export default function SignIn() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -18,14 +20,17 @@ export default function SignIn() {
   const navigate = useNavigate();
   const { email, password } = formData;
 
-  useEffect(() => {
-    getAllUsers()
-  }, []);
+  // useEffect(() => {
+  //   getAllUsers()
+  // }, []);
 
-  const getAllUsers=async ()=>{
-    const res = await getUsers();
-    setUsers(res.data);
-  }
+  // const getAllUsers=async ()=>{
+  //   const res = await getUsers();
+  //   const res1 = res;
+  //   setUsers(res1.data);
+  //   localStorage.setItem("stringfy",JSON.stringify(res1))
+  //   localStorage.setItem("token1", res1.data.token);
+  // }
   function onChange(e) {
     //console.log(e.target.value);
     setFormData((prevState) => ({
@@ -33,18 +38,32 @@ export default function SignIn() {
       [e.target.id]: e.target.value,
     }));
   }
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault();
-    if (
-      users !== null &&
-      users.find((user) => user.email === email && user.password === password)
-    ) {
-      localStorage.setItem('id',)
-      toast("login success", { type: "success" });
+
+    try{
+      const response = await axios.post(BASE_URL, {
+        email,
+        password,
+      });
+      console.log(response.data);
+      const token = response.data.token;
+      localStorage.setItem('tok',token);
       navigate("/");
-    } else {
-      toast("error, login failed",{type:'error'});
+    } catch(error){
+      toast("error, login failed", { type: "error" });
+      console.log(error);
     }
+    // if (
+    //   users !== null &&
+    //   users.find((user) => user.email === email && user.password === password)
+    // ) {
+    //   //localStorage.setItem('id',)
+    //   toast("login success", { type: "success" });
+    //   navigate("/");
+    // } else {
+    //   toast("error, login failed",{type:'error'});
+    // }
   }
   return (
     <section>
@@ -54,7 +73,7 @@ export default function SignIn() {
           <img src={login} alt="sign in" className="w-full rounded-2xl" />
         </div>
         <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20 relative">
-          <form onSubmit={handleLogin}>
+          <form onSubmit={(e)=>handleLogin(e)}>
             <input
               type="text"
               id="email"
