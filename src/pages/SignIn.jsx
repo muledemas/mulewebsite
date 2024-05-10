@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { getUsers } from "../components/services/User";
 import axios from "axios";
 import { BASE_URL } from "../constants/ApiConstants";
+import { useAuth } from "../providers/authProvider";
 
 export default function SignIn() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -20,6 +21,7 @@ export default function SignIn() {
   const navigate = useNavigate();
   const { email, password } = formData;
 
+  const { setToken } = useAuth();
   // useEffect(() => {
   //   getAllUsers()
   // }, []);
@@ -38,18 +40,23 @@ export default function SignIn() {
       [e.target.id]: e.target.value,
     }));
   }
-  async function handleLogin(e) {
+ function handleLogin(e) {
     e.preventDefault();
 
     try{
-      const response = await axios.post(BASE_URL, {
-        email,
-        password,
-      });
-      console.log(response.data);
-      const token = response.data.token;
-      localStorage.setItem('tok',token);
-      navigate("/");
+       axios.get(BASE_URL).then(response=>{
+        response.data.map(user=>{
+          if(user.email===email && user.password===password){
+            toast("user login success",{type:"success"});
+             setToken("my_token");
+             navigate("/profile", { replace: true });
+          }
+          else{
+            toast("failed login",{type:'error'})
+          }
+        })
+       });
+      
     } catch(error){
       toast("error, login failed", { type: "error" });
       console.log(error);

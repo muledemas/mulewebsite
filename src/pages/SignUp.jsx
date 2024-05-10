@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import login from "../images/login.jpg";
 import { Link } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-//import axios from "axios";
+import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 import { addUser } from "../components/services/User";
 
-export default function SignUp({ onRegister }) {
+export default function SignUp() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
@@ -40,12 +40,13 @@ export default function SignUp({ onRegister }) {
 
   const handleRegister = async () => {
     try {
-      const response = await axios.post("http://localhost:5000/register", {
+      const response = await axios.post("http://localhost:5000/users", {
         name,
         email,
         password,
       });
-      onRegister(); // Notify parent component that registration was successful
+      navigate('/');
+      //onRegister(); // Notify parent component that registration was successful
     } catch (error) {
       console.error("Registration error:", error);
       toast("Registration failed. Please try again.");
@@ -54,7 +55,7 @@ export default function SignUp({ onRegister }) {
 
   function redirectToHome() {
     // props.history.push('/');
-    navigate("/");
+    //navigate("/");
   }
 
   return (
