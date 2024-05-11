@@ -52,6 +52,7 @@
     ]
   },
   "devDependencies": {
+    "jest": "^27.5.1",
     "json-server-auth": "^2.1.0"
   }
 }

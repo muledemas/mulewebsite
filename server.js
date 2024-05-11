@@ -65,79 +65,51 @@
 // });
 
 
-const http = require("http");
-const url = require("url");
-const fs = require("fs");
-const path = require("path");
+const jsonServer = require("json-server");
 const jwt = require("jsonwebtoken");
+const server = jsonServer.create();
+const router = jsonServer.router("db.json");
+const middlewares = jsonServer.defaults();
 
-const PORT = 5000;
-const SECRET_KEY = "mule_secret_key";
+const SECRET_KEY = "your_secret_key";
 
-const usersFilePath = path.join(__dirname, "db.json");
-let usersData = JSON.parse(fs.readFileSync(usersFilePath, "utf-8"));
+server.use(jsonServer.bodyParser);
+server.use(middlewares);
 
-const server = http.createServer((req, res) => {
-  const { pathname, query } = url.parse(req.url, true);
+server.post("/login", (req, res) => {
+  const { username, password } = req.body;
+  const user = router.db.get("users").find({ username, password }).value();
 
-  if (pathname === "/login" && req.method === "POST") {
-    let body = "";
-    req.on("data", (chunk) => {
-      body += chunk.toString();
-    });
-
-    req.on("end", () => {
-      const { username, password } = JSON.parse(body);
-      const user = usersData.users.find(
-        (u) => u.username === username && u.password === password
-      );
-
-      if (!user) {
-        res.writeHead(401, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "Invalid username or password" }));
-      } else {
-        const token = jwt.sign({ userId: user.id }, SECRET_KEY);
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ token }));
-      }
-    });
-  } else if (pathname === "/profile" && req.method === "GET") {
-    const token = req.headers.authorization?.replace("Bearer ", "");
-
-    if (!token) {
-      res.writeHead(401, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Authorization token missing" }));
-      return;
-    }
-
-    try {
-      const decoded = jwt.verify(token, SECRET_KEY);
-      const userId = decoded.userId;
-      const user = usersData.users.find((u) => u.id === userId);
-
-      if (!user) {
-        res.writeHead(404, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "User not found" }));
-      } else {
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(
-          JSON.stringify({
-            id: user.id,
-            username: user.username,
-            email: user.email,
-          })
-        );
-      }
-    } catch (error) {
-      res.writeHead(401, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Invalid token" }));
-    }
+  if (!user) {
+    res.status(401).json({ error: "Invalid username or password" });
   } else {
-    res.writeHead(404, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: "Endpoint not found" }));
+    const token = jwt.sign({ userId: user.id }, SECRET_KEY);
+    res.json({ token });
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+server.get("/profile", (req, res) => {
+  const token = req.headers.authorization.replace("Bearer ", "");
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const userId = decoded.userId;
+    const user = router.db.get("users").find({ id: userId }).value();
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+    } else {
+      res.json({
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        email: user.email,
+      });
+    }
+  } catch (error) {
+    res.status(401).json({ error: "Invalid token" });
+  }
+});
+
+server.use(router);
+server.listen(3001, () => {
+  console.log("JSON Server is running on port 3001");
 });

@@ -14,14 +14,14 @@ import { addUser } from "../components/services/User";
 export default function SignUp() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
     password: "",
   });
   //const [users, setUsers] = useState([]);
   const [showpassword, setShowPassword] = useState(false);
 
-  const { name, email, password } = formData;
+  const { username, email, password } = formData;
 
   function onChange(e) {
     setFormData((prevState) => ({
@@ -38,19 +38,31 @@ export default function SignUp() {
   //   }
   // };
 
-  const handleRegister = async () => {
-    try {
-      const response = await axios.post("http://localhost:5000/users", {
-        name,
-        email,
-        password,
-      });
-      navigate('/');
-      //onRegister(); // Notify parent component that registration was successful
-    } catch (error) {
-      console.error("Registration error:", error);
-      toast("Registration failed. Please try again.");
-    }
+  const handleRegister = () => {
+    // try {
+    //   const response = await axios.post("http://localhost:5000/users", {
+    //     name,
+    //     email,
+    //     password,
+    //   });
+    //   navigate('/');
+    //   //onRegister(); // Notify parent component that registration was successful
+    // } catch (error) {
+    //   console.error("Registration error:", error);
+    //   toast("Registration failed. Please try again.");
+    // }
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        username: username,
+        email: email,
+        password:password
+      })
+    );
+    // window.location.reload(); // Reload page to trigger redirect
+
+    
   };
 
   function redirectToHome() {
@@ -69,14 +81,14 @@ export default function SignUp() {
           <form>
             <input
               type="text"
-              id="name"
-              value={name}
-              placeholder="First name"
+              id="username"
+              value={username}
+              placeholder="Username"
               onChange={onChange}
               className="w-full text-xl px-4 py-2 bg-white text-gray-700 border-gray-300 rounded transition ease-in-out mb-4"
             />
             <input
-              type="text"
+              type="email"
               id="email"
               value={email}
               placeholder="Email address"

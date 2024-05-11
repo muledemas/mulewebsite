@@ -8,20 +8,20 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { useNavigate } from "react-router-dom";
 
-import { getUsers } from "../components/services/User";
+//import { getUsers } from "../components/services/User";
 import axios from "axios";
 import { BASE_URL } from "../constants/ApiConstants";
 import { useAuth } from "../providers/authProvider";
 
 export default function SignIn() {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({username:'', email: "", password: "" });
   const [users, setUsers] = useState([]);
   const [showpassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
-  const { email, password } = formData;
+  const {username, email, password } = formData;
 
-  const { setToken } = useAuth();
+  //const { setToken } = useAuth();
   // useEffect(() => {
   //   getAllUsers()
   // }, []);
@@ -41,37 +41,50 @@ export default function SignIn() {
     }));
   }
  function handleLogin(e) {
-    e.preventDefault();
-
-    try{
-       axios.get(BASE_URL).then(response=>{
-        response.data.map(user=>{
-          if(user.email===email && user.password===password){
-            toast("user login success",{type:"success"});
-             setToken("my_token");
-             navigate("/profile", { replace: true });
-          }
-          else{
-            toast("failed login",{type:'error'})
-          }
-        })
-       });
-      
-    } catch(error){
-      toast("error, login failed", { type: "error" });
-      console.log(error);
+   e.preventDefault();
+    if (username === 'user' && password === 'pass') {
+      const user = {
+        id: 1,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+      };
+      localStorage.setItem("user", JSON.stringify(user));
+      //onLogin(user);
+    } else {
+      alert("Invalid username or password");
     }
-    // if (
-    //   users !== null &&
-    //   users.find((user) => user.email === email && user.password === password)
-    // ) {
-    //   //localStorage.setItem('id',)
-    //   toast("login success", { type: "success" });
-    //   navigate("/");
-    // } else {
-    //   toast("error, login failed",{type:'error'});
-    // }
-  }
+
+
+   // try{
+   //    axios.get(BASE_URL).then(response=>{
+   //     response.data.map(user=>{
+   //       if(user.email===email && user.password===password){
+   //         toast("user login success",{type:"success"});
+   //          //setToken("my_token");
+   //          navigate("/profile", { replace: true });
+   //       }
+   //       else{
+   //         toast("failed login",{type:'error'})
+   //       }
+   //     })
+   //    });
+
+   // } catch(error){
+   //   toast("error, login failed", { type: "error" });
+   //   console.log(error);
+   // }
+   // if (
+   //   users !== null &&
+   //   users.find((user) => user.email === email && user.password === password)
+   // ) {
+   //   //localStorage.setItem('id',)
+   //   toast("login success", { type: "success" });
+   //   navigate("/");
+   // } else {
+   //   toast("error, login failed",{type:'error'});
+   // }
+ }
   return (
     <section>
       <h1 className="text-3xl text-center mt-6 font-bold">Sign In</h1>
